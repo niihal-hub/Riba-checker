@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RibaCheck 🌙
 
-## Getting Started
+RibaCheck is a free, English-language web app that helps users identify potential riba (interest), gharar (uncertainty), or maysir (gambling) in financial documents based on mainstream Islamic finance principles.
 
-First, run the development server:
+## ⚠️ Important Notice
+**This tool provides general information only. It is NOT a fatwa service.** Every result explicitly directs users to consult a qualified Islamic scholar for a formal ruling.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Tech Stack
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS
+- **AI**: Claude API (Anthropic)
+- **Validation**: Zod
+- **Deployment**: Vercel
+
+## Setup & Deployment
+
+### 1. Environment Variables
+Create a `.env.local` file in the root directory:
+```env
+ANTHROPIC_API_KEY=your_api_key_here
+MODEL_NAME=claude-3-haiku-20240307
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Installation
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run Locally
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Deploy to Vercel
+Push the code to GitHub and connect the repository to Vercel. Add the environment variables in the Vercel dashboard.
 
-## Learn More
+## Project Structure
+- `/app`: Next.js pages and API routes.
+- `/components`: Reusable UI elements (Disclaimer, Result Cards).
+- `/lib/analysis`: The logic engine (Rule-based $\rightarrow$ Knowledge Base $\rightarrow$ AI).
+- `/knowledge`: Markdown files containing the Sharia principles used for analysis.
+- `/tests`: Sample documents and a validation runner.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Privacy
+RibaCheck is designed with privacy-first principles. No documents or text are stored on the server; all processing occurs in memory during the request lifecycle.

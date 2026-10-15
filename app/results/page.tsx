@@ -1,39 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Disclaimer } from '@/components/Disclaimer';
 import { StatusBadge } from '@/components/StatusBadge';
 import { ResultCard } from '@/components/ResultCard';
 
-// Mock data for UI skeleton verification
-const MOCK_RESULT = {
-  document_type: 'Personal Loan',
-  overall_status: 'likely_not_ok',
-  confidence: 'high',
-  summary: 'This document contains clear evidence of interest-based lending (riba al-nasia), specifically a fixed annual interest rate and compounding penalties.',
-  flags: [
-    {
-      quote: 'The borrower agrees to pay an annual interest rate of 12% compounded monthly.',
-      category: 'riba',
-      severity: 'high',
-      why: 'Charging interest on a loan is the core definition of riba al-nasia.',
-      scholars_differ: false,
-      halal_alternative: 'Consider a Murabaha (cost-plus-profit) agreement or a Qard Hassan (interest-free loan).'
-    },
-    {
-      quote: 'Late payments will incur a 5% penalty fee per month.',
-      category: 'riba',
-      severity: 'medium',
-      why: 'Many scholars consider late fees that increase the debt to be a form of riba.',
-      scholars_differ: true,
-      halal_alternative: 'Some Sharia-compliant contracts use a fixed donation to charity for late payments instead of a fee to the lender.'
-    }
-  ],
-  questions_for_scholar: [
-    'Is the processing fee a flat service charge or a hidden interest cost?',
-    'Are there any options for a profit-sharing arrangement instead of a fixed rate?'
-  ]
-};
-
 export default function ResultsPage() {
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const data = localStorage.getItem('ribacheck_last_result');
+    if (data) {
+      setResult(JSON.parse(data));
+    }
+    setLoading(false);
+  }, []);
+
+  const copyReport = () => {
+    if (!result) return;
+    const text = `RibaCheck Report: ${result.document_type}\nStatus: ${result.overall_status}\nSummary: ${result.summary}\n\nQuestions for Scholar:\n${result.questions_for_scholar.join('\n')}`;
+    navigator.clipboard.writeText(text);
+    alert('Report copied to clipboard!');
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (!result) return <div className="min-h-screen flex items-center justify-center">No result found. Please go back and check a document.</div>;
+
   return (
     <main className="min-h-screen bg-gray-50">
       <Disclaimer />
@@ -42,43 +33,47 @@ export default function ResultsPage() {
           <a href="/" className="text-blue-600 hover:underline text-sm flex items-center gap-1">
             ← Back to check
           </a>
-          <button className="px-3 py-1.5 bg-white border border-gray-300 rounded text-xs font-medium hover:bg-gray-50">
+          <button
+            onClick={copyReport}
+            className="px-3 py-1.5 bg-white border border-gray-300 rounded text-xs font-medium hover:bg-gray-50"
+          >
             Copy Report
           </button>
         </div>
 
         <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200 mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">{MOCK_RESULT.document_type}</h2>
-            <StatusBadge status={MOCK_RESULT.overall_status} />
+            <h2 className="text-2xl font-bold text-gray-900">{result.document_type}</h2>
+            <StatusBadge status={result.overall_status} />
           </div>
-          <p className="text-gray-600 mb-4 leading-relaxed">{MOCK_RESULT.summary}</p>
+          <p className="text-gray-600 mb-4 leading-relaxed">{result.summary}</p>
           <div className="text-xs text-gray-400">
-            Confidence: <span className="font-medium text-gray-600 uppercase">{MOCK_RESULT.confidence}</span>
+            Confidence: <span className="font-medium text-gray-600 uppercase">{result.confidence}</span>
           </div>
         </div>
 
         <h3 className="text-lg font-bold text-gray-900 mb-4">Potential Concerns</h3>
         <div className="mb-8">
-          {MOCK_RESULT.flags.map((flag, i) => (
-            <ResultCard key={i} flag={flag} />
-          ))}
+          {result.flags && result.flags.length > 0 ? (
+            result.flags.map((flag: any, i: number) => (
+              <ResultCard key={i} flag={flag} />
+            ))
+          ) : (
+            <p className="text-gray-500 italic">No major concerns were detected.</p>
+          )}
         </div>
 
         <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
           <h3 className="text-lg font-bold text-blue-900 mb-3 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9//a 4.989 4.989 0 013.5 2.4 4.989 4.989 0 013.5-2.4m-12 0a4.989 4.989 0 003.5-2.4 4.989 4.989 0 003.5-2.4m-12 0a4.989 4.989 0 003.5-2.4 4.989 4.989 0 003.5-2.4" />
-            </svg>
             Questions to ask a scholar
           </h3>
           <ul className="space-y-2">
-            {MOCK_RESULT.questions_for_scholar.map((q, i) => (
+            {result.questions_for_scholar?.map((q: string, i: number) => (
               <li key={i} className="text-sm text-blue-800 flex gap-2">
                 <span className="font-bold">•</span>
                 {q}
               </li>
-            ))}
+            )) || <li>No specific questions suggested.</li>}
           </ul>
         </div>
 

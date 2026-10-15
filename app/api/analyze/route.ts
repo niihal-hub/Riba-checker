@@ -10,45 +10,41 @@ const anthropic = new Anthropic({
 
 export async function POST(req: NextRequest) {
   try {
-    const { text } = await req.json();
-    if (!text) {
-      return NextResponse.json({ error: 'No text provided' }, { status: 400 });
-    }
+    const body = await req.formData();
+    const text = body.get('text') as string | null;
+    const file = body.get('file') as File | null;
 
-    // 1. Rule-based checks (Deterministic)
-    const ruleFlags = runRuleBasedChecks(text);
+    let contentToAnalyze = text || '';
 
-    // 2. Load Knowledge Base
-    const knowledge = await loadKnowledgeBase();
+    if (file) {
+      // Handle images and PDFs using Claude Vision
+      const arrayBuffer = await file.arrayBuffer();
+      const base64 = Buffer.from(arrayBuffer).toString('base64');
+      const mimeType = file.type;
 
-    // 3. Call Claude
-    const model = process.env.MODEL_NAME || 'claude-3-haiku-20240307';
+      const model = process.env.MODEL_NAME || 'claude-3-haiku-20240307';
+      const knowledge = await loadKnowledgeBase();
 
-    const systemPrompt = `
-You are an expert in Islamic Finance. Your task is to analyze financial documents for potential Riba (interest), Gharar (uncertainty), or Maysir (gambling).
-
-CRITICAL RULES:
-1. You provide information, NOT fatwas.
-2. If scholars differ on a point, you MUST state that they differ.
-3. Do not invent rulings or numbers.
-4. Use simple English. Short sentences.
-5. Always include a reminder to ask a qualified scholar.
+      const systemPrompt = `
+You are an expert in Islamic Finance. Analyze this financial document for Riba, Gharar, or Maysir.
+Crtitcal: Provide information, NOT fatwas.
+If scholars differ, show both views.
+Use simple English.
 
 KNOWLEDGE BASE:
 ${knowledge}
 
-OUTPUT FORMAT:
-You must return ONLY a valid JSON object matching this schema:
+Return ONLY a strict JSON object:
 {
   "document_type": "string",
   "overall_status": "likely_ok" | "has_concerns" | "likely_not_ok" | "unclear",
   "confidence": "low" | "medium" | "high",
-  "summary": "string (max 80 words)",
+  "summary": "string",
   "flags": [{
-    "quote": "exact text from document",
+    "quote": "string",
     "category": "riba" | "gharar" | "maysir" | "other",
     "severity": "low" | "medium" | "high",
-    "why": "simple explanation",
+    "why": "string",
     "scholars_differ": boolean,
     "halal_alternative": "string"
   }],
@@ -56,36 +52,57 @@ You must return ONLY a valid JSON object matching this schema:
 }
 `;
 
-    const userPrompt = `
-DOCUMENT TEXT:
-${text}
+      const response = await anthropic.messages.create({
+        model: model,
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: mimeType === 'application/pdf' ? 'image/jpeg' : mimeType, // Claude handles PDFs as images internally in some versions, or we'd use a PDF parser
+                  data: base64,
+                },
+              },
+              { type: 'text', text: 'Please analyze this document for Sharia compliance regarding riba, gharar, and maysir.' },
+            ],
+          },
+        ],
+      });
 
-PRELIMINARY RULE-BASED FLAGS:
-${JSON.stringify(ruleFlags)}
+      const resultText = response.content[0].type === 'text' ? response.content[0].text : '';
+      const jsonString = resultText.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(jsonString);
+      return NextResponse.json(AnalysisResponseSchema.parse(parsed));
+    }
 
-Please analyze the document. If the rule-based flags are correct, include them in your final JSON. If you find new issues, add them. If a rule-based flag is actually okay in context, exclude it.
-`;
+    if (!contentToAnalyze) {
+      return NextResponse.json({ error: 'No content provided' }, { status: 400 });
+    }
+
+    // Fallback for text-only
+    const ruleFlags = runRuleBasedChecks(contentToAnalyze);
+    const knowledge = await loadKnowledgeBase();
+    const model = process.env.MODEL_NAME || 'claude-3-haiku-20240307';
 
     const response = await anthropic.messages.create({
       model: model,
       max_tokens: 2000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
+      system: `You are an expert in Islamic Finance. Analyze this text for Riba, Gharar, and Maysir. Use this knowledge: ${knowledge}`,
+      messages: [{ role: 'user', content: `Text: ${contentToAnalyze}\n\nRule Flags: ${JSON.stringify(ruleFlags)}` }],
     });
 
-    const content = response.content[0].type === 'text' ? response.content[0].text : '';
-
-    // Clean JSON (remove markdown blocks if present)
-    const jsonString = content.replace(/```json|```/g, '').trim();
+    const resultText = response.content[0].type === 'text' ? response.content[0].text : '';
+    const jsonString = resultText.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(jsonString);
-
-    // Validate with Zod
-    const validated = AnalysisResponseSchema.parse(parsed);
-
-    return NextResponse.json(validated);
+    return NextResponse.json(AnalysisResponseSchema.parse(parsed));
 
   } catch (error: any) {
     console.error('Analysis Error:', error);
-    return NextResponse.json({ error: 'Analysis failed. Please try again.' }, { status: 500 });
+    return NextResponse.json({ error: 'Analysis failed.' }, { status: 500 });
   }
 }

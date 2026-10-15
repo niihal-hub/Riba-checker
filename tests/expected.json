@@ -1,0 +1,142 @@
+[
+  {
+    "id": "loan-1",
+    "name": "Conventional Personal Loan",
+    "content": "Standard Personal Loan Agreement. Loan Amount: $5,000. Interest Rate: 12% APR compounded monthly. Late payment penalty: $25 per occurrence. Term: 24 months.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "loan-2",
+    "name": "Quick Cash Loan",
+    "content": "Fast Loan Terms. Borrow $1,000, pay back $1,100 in 30 days. A fixed fee of $100 is added for the convenience of the loan.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "loan-3",
+    "name": "Student Loan",
+    "content": "Education Loan Agreement. Interest accrues at 4% per annum. Interest is capitalized daily.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "loan-4",
+    "name": "Auto Finance",
+    "content": "Car Loan Agreement. APR: 6.5%. Monthly payment includes principal and interest. Variable rate based on LIBOR + 2%.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "loan-5",
+    "name": "Micro-loan",
+    "content": "Small business loan. Interest: 1% per week. Late fees applied to the outstanding balance.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "emi-1",
+    "name": "Laptop EMI Plan",
+    "content": "Buy now, pay later. Laptop cost $1,200. 0% Interest EMI for 6 months. Processing fee: $50. No late fees.",
+    "expected_status": "likely_ok",
+    "expected_flags": []
+  },
+  {
+    "id": "emi-2",
+    "name": "Phone EMI",
+    "content": "Phone Installment Plan. 12 months. 5% interest charged on the remaining balance each month.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "emi-3",
+    "name": "Furniture EMI",
+    "content": "EMI Plan. Total price: $2,000. Monthly payment: $200 for 12 months. Total paid: $2,400. Fixed markup included.",
+    "expected_status": "has_concerns",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "emi-4",
+    "name": "Jewelry EMI",
+    "content": "Gold Jewelry EMI. 0% interest, but a 'service charge' of 2% per month is applied to the principal.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "ins-1",
+    "name": "Life Insurance",
+    "content": "Whole Life Policy. Monthly premium $50. Payout upon death. Investment component based on stock market returns.",
+    "expected_status": "has_concerns",
+    "expected_flags": ["gharar"]
+  },
+  {
+    "id": "ins-2",
+    "name": "Health Insurance",
+    "content": "Medical Coverage Plan. Pay $100/month. Company pays for hospital bills up to $1M. Subject to underwriting.",
+    "expected_status": "has_concerns",
+    "expected_flags": ["gharar"]
+  },
+  {
+    "id": "ins-3",
+    "name": "Car Insurance",
+    "content": "Auto Insurance. Annual premium $500. Coverage for accidents and theft.",
+    "expected_status": "has_concerns",
+    "expected_flags": ["gharar"]
+  },
+  {
+    "id": "cc-1",
+    "name": "Rewards Credit Card",
+    "content": "Credit Limit: $10,000. APR: 18.99%. Late fee: $40. Cash advance fee: 3%.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "cc-2",
+    "name": "Platinum Card",
+    "content": "No annual fee. 21% APR on balances not paid by the due date. Compounding interest daily.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "cc-3",
+    "name": "Student Card",
+    "content": "Low interest credit card. 12% APR. No late fees for first 3 months.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba"]
+  },
+  {
+    "id": "chit-1",
+    "name": "Community Chit Fund",
+    "content": "10 members, $100/month. Total pool $1,000. Winner takes $800, and $200 is split among members as interest.",
+    "expected_status": "likely_not_ok",
+    "expected_flags": ["riba", "maysir"]
+  },
+  {
+    "id": "chit-2",
+    "name": "Gold Chit Fund",
+    "content": "Monthly contribution for gold. Fixed amount of gold guaranteed at the end of 2 years.",
+    "expected_status": "has_concerns",
+    "expected_flags": ["gharar"]
+  },
+  {
+    "id": "chit-3",
+    "name": "Family Chit",
+    "content": "Rotation fund. members contribute $50/month. One person takes the whole pot each month. No fees.",
+    "expected_status": "likely_ok",
+    "expected_flags": []
+  },
+  {
+    "id": "mur-1",
+    "name": "Halal Home Finance",
+    "content": "Murabaha Agreement. Bank buys home for $200k, sells to client for $250k. Payment: $1,500/month for 20 years. Fixed price.",
+    "expected_status": "likely_ok",
+    "expected_flags": []
+  },
+  {
+    "id": "mur-2",
+    "name": "Halal Car Purchase",
+    "content": "Murabaha contract. Car bought by agency for $20k. Sold to user for $22k. No interest, fixed profit markup.",
+    "expected_status": "likely_ok",
+    "expected_flags": []
+  }
+]
